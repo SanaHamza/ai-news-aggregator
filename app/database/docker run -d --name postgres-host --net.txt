@@ -1,0 +1,1 @@
+docker run -d --name postgres-host --network host -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=ai_news_aggregator -v docker_postgres_data:/var/lib/postgresql/data postgres:17

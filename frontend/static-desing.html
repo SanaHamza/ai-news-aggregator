@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI News Aggregator</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --panel-soft: #f8fafc;
+      --ink: #111827;
+      --muted: #5f6b7a;
+      --faint: #94a3b8;
+      --line: #dbe3ef;
+      --accent: #2563eb;
+      --accent-strong: #1d4ed8;
+      --teal: #0f766e;
+      --rose: #e11d48;
+      --amber: #b45309;
+      --green: #15803d;
+      --shadow: 0 18px 55px rgba(15, 23, 42, .12);
+      --shadow-sm: 0 8px 22px rgba(15, 23, 42, .08);
+      --radius: 8px;
+      --fast: 160ms ease;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      min-height: 100vh;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        linear-gradient(135deg, rgba(37, 99, 235, .10), transparent 36%),
+        linear-gradient(315deg, rgba(15, 118, 110, .10), transparent 38%),
+        var(--bg);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input { font: inherit; }
+    button { border: 0; cursor: pointer; }
+    a { color: inherit; }
+    .hidden { display: none !important; }
+
+    .icon {
+      width: 18px;
+      height: 18px;
+      display: inline-block;
+      flex: 0 0 auto;
+    }
+
+    .btn {
+      min-height: 42px;
+      border-radius: var(--radius);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 16px;
+      font-weight: 700;
+      transition: transform var(--fast), box-shadow var(--fast), background var(--fast), color var(--fast), border-color var(--fast);
+      white-space: nowrap;
+    }
+
+    .btn:disabled {
+      opacity: .62;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 10px 22px rgba(37, 99, 235, .24);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-strong);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      border-color: #bac7d8;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-danger {
+      background: #fff1f2;
+      color: #be123c;
+      border: 1px solid #fecdd3;
+    }
+
+    .btn-danger:hover {
+      background: #ffe4e6;
+      border-color: #fda4af;
+    }
+
+    .field { display: grid; gap: 7px; }
+
+    .field-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .field label {
+      color: var(--ink);
+      font-size: .86rem;
+      font-weight: 700;
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrap svg {
+      position: absolute;
+      left: 13px;
+      color: var(--faint);
+      pointer-events: none;
+    }
+
+    .input {
+      width: 100%;
+      height: 46px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--ink);
+      padding: 0 13px 0 42px;
+      outline: none;
+      transition: border-color var(--fast), box-shadow var(--fast);
+    }
+
+    .input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, .12);
+    }
+
+    .input::placeholder { color: var(--faint); }
+
+    .password-toggle {
+      position: absolute;
+      right: 8px;
+      width: 34px;
+      height: 34px;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      display: grid;
+      place-items: center;
+    }
+
+    .password-toggle:hover { background: var(--panel-soft); color: var(--ink); }
+
+    .password-input { padding-right: 46px; }
+
+    .alert {
+      border-radius: var(--radius);
+      padding: 11px 12px;
+      font-size: .9rem;
+      font-weight: 650;
+      line-height: 1.45;
+    }
+
+    .alert-error {
+      color: #991b1b;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+    }
+
+    .auth-screen {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+    }
+
+    .auth-layout {
+      width: min(1120px, 100%);
+      min-height: 680px;
+      display: grid;
+      grid-template-columns: minmax(360px, 440px) 1fr;
+      background: rgba(255, 255, 255, .86);
+      border: 1px solid rgba(219, 227, 239, .9);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(18px);
+    }
+
+    .auth-card {
+      background: #fff;
+      padding: clamp(24px, 4vw, 44px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border-right: 1px solid var(--line);
+    }
+
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 34px;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--teal));
+      box-shadow: 0 12px 28px rgba(37, 99, 235, .22);
+    }
+
+    .brand-text strong {
+      display: block;
+      font-size: 1rem;
+      letter-spacing: 0;
+    }
+
+    .brand-text span {
+      display: block;
+      color: var(--muted);
+      font-size: .83rem;
+      margin-top: 2px;
+    }
+
+    .auth-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      line-height: 1.02;
+      letter-spacing: 0;
+      margin-bottom: 12px;
+    }
+
+    .auth-subtitle {
+      color: var(--muted);
+      line-height: 1.65;
+      margin-bottom: 26px;
+    }
+
+    .auth-tabs {
+      width: 100%;
+      height: 44px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-soft);
+      margin-bottom: 22px;
+    }
+
+    .auth-tab {
+      border-radius: 6px;
+      color: var(--muted);
+      background: transparent;
+      font-weight: 800;
+    }
+
+    .auth-tab.active {
+      background: #fff;
+      color: var(--ink);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, .08);
+    }
+
+    .auth-form { display: none; gap: 16px; }
+    .auth-form.active { display: grid; }
+
+    .form-actions {
+      display: grid;
+      gap: 12px;
+      margin-top: 2px;
+    }
+
+    .password-meter {
+      height: 7px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #e5e7eb;
+      margin-top: 2px;
+    }
+
+    .password-meter span {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: var(--rose);
+      transition: width var(--fast), background var(--fast);
+    }
+
+    .password-hints {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 700;
+    }
+
+    .hint {
+      border: 1px solid var(--line);
+      background: var(--panel-soft);
+      border-radius: 999px;
+      padding: 4px 8px;
+    }
+
+    .hint.good {
+      color: #166534;
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+    }
+
+    .auth-art {
+      position: relative;
+      padding: clamp(26px, 4vw, 52px);
+      display: grid;
+      align-content: center;
+      background:
+        linear-gradient(135deg, rgba(15, 118, 110, .18), transparent 34%),
+        linear-gradient(315deg, rgba(37, 99, 235, .16), transparent 42%),
+        #eef4ff;
+      overflow: hidden;
+    }
+
+    .brief-stack {
+      position: relative;
+      display: grid;
+      gap: 16px;
+      z-index: 1;
+    }
+
+    .brief-card {
+      border: 1px solid rgba(148, 163, 184, .32);
+      background: rgba(255, 255, 255, .72);
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, .10);
+      backdrop-filter: blur(14px);
+    }
+
+    .brief-card.wide { width: min(520px, 100%); }
+    .brief-card.offset { width: min(430px, 88%); margin-left: auto; }
+
+    .brief-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      color: var(--muted);
+      font-size: .82rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .brief-pill {
+      border-radius: 999px;
+      padding: 5px 9px;
+      background: #ecfeff;
+      color: #0f766e;
+      border: 1px solid #a5f3fc;
+      text-transform: none;
+    }
+
+    .brief-title {
+      font-size: clamp(1.8rem, 5vw, 3.6rem);
+      line-height: 1;
+      letter-spacing: 0;
+      margin-bottom: 12px;
+    }
+
+    .brief-copy {
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.7;
+      max-width: 560px;
+    }
+
+    .signal-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .signal {
+      min-height: 82px;
+      border-radius: var(--radius);
+      padding: 12px;
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .signal strong {
+      display: block;
+      font-size: 1.45rem;
+      line-height: 1;
+      margin-bottom: 7px;
+    }
+
+    .signal span {
+      color: var(--muted);
+      font-size: .8rem;
+      font-weight: 700;
+    }
+
+    .app-shell { min-height: 100vh; }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      min-height: 70px;
+      padding: 12px clamp(16px, 4vw, 44px);
+      display: grid;
+      grid-template-columns: auto minmax(220px, 520px) auto;
+      align-items: center;
+      gap: 18px;
+      background: rgba(255, 255, 255, .88);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      text-decoration: none;
+      min-width: 0;
+    }
+
+    .brand .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      box-shadow: none;
+    }
+
+    .brand-name {
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .search-wrap {
+      position: relative;
+      width: 100%;
+    }
+
+    .search-wrap svg {
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--faint);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 42px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--panel-soft);
+      padding: 0 14px 0 42px;
+      color: var(--ink);
+      outline: none;
+      transition: border-color var(--fast), box-shadow var(--fast), background var(--fast);
+    }
+
+    .search-input:focus {
+      background: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, .12);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .status-pill {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: .82rem;
+      font-weight: 800;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--faint);
+      position: relative;
+    }
+
+    .status-dot.active { background: #22c55e; }
+
+    .status-dot.active::after {
+      content: "";
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: rgba(34, 197, 94, .18);
+      animation: pulse 1.4s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(.7); opacity: .9; }
+      50% { transform: scale(1.4); opacity: 0; }
+    }
+
+    .user-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      padding: 5px 10px 5px 5px;
+    }
+
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--teal));
+      font-size: .82rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .user-name {
+      max-width: 130px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: .84rem;
+      font-weight: 800;
+    }
+
+    .scanning-bar {
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--teal), #f59e0b);
+      background-size: 200% 100%;
+      display: none;
+      animation: scan 1.15s linear infinite;
+    }
+
+    .scanning-bar.active { display: block; }
+
+    @keyframes scan {
+      from { background-position: 200% center; }
+      to { background-position: -200% center; }
+    }
+
+    .main {
+      width: min(1280px, 100%);
+      margin: 0 auto;
+      padding: 30px clamp(16px, 4vw, 44px) 64px;
+    }
+
+    .dashboard-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .section-title {
+      font-size: clamp(1.65rem, 3vw, 2.35rem);
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .section-sub {
+      color: var(--muted);
+      margin-top: 7px;
+      font-weight: 600;
+    }
+
+    .tabs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .tab-btn {
+      min-height: 36px;
+      border-radius: 999px;
+      padding: 0 15px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 800;
+      border: 1px solid transparent;
+      transition: background var(--fast), color var(--fast), border-color var(--fast);
+    }
+
+    .tab-btn:hover:not(.active) {
+      background: #fff;
+      border-color: var(--line);
+      color: var(--ink);
+    }
+
+    .tab-btn.active {
+      background: #111827;
+      color: #fff;
+      border-color: #111827;
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      min-width: 0;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 3px 14px rgba(15, 23, 42, .04);
+      transition: transform var(--fast), box-shadow var(--fast), border-color var(--fast);
+      animation: fadeUp .32s ease both;
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: #c6d3e3;
+      box-shadow: var(--shadow-sm);
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-img-wrap {
+      position: relative;
+      height: 184px;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+
+    .card-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 320ms ease;
+    }
+
+    .card:hover .card-img-wrap img { transform: scale(1.04); }
+
+    .badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: .72rem;
+      font-weight: 900;
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, .36);
+      backdrop-filter: blur(10px);
+    }
+
+    .badge-openai { background: rgba(37, 99, 235, .92); }
+    .badge-youtube { background: rgba(225, 29, 72, .92); }
+    .badge-anthropic { background: rgba(180, 83, 9, .92); }
+
+    .card-body {
+      padding: 18px 18px 0;
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+    }
+
+    .card-title {
+      font-size: 1rem;
+      line-height: 1.42;
+      letter-spacing: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 9px;
+    }
+
+    .card-desc {
+      color: var(--muted);
+      font-size: .9rem;
+      line-height: 1.62;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      flex: 1;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 15px 18px 17px;
+      margin-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      gap: 7px;
+      color: var(--faint);
+      font-size: .78rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .card-meta-source { font-weight: 900; }
+    .card-meta-source.openai { color: var(--accent); }
+    .card-meta-source.youtube { color: var(--rose); }
+    .card-meta-source.anthropic { color: var(--amber); }
+
+    .read-more {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--accent);
+      font-size: .82rem;
+      font-weight: 900;
+      text-decoration: none;
+      flex: 0 0 auto;
+    }
+
+    .read-more:hover { color: var(--accent-strong); }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      min-height: 320px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed #bfcbda;
+      background: rgba(255, 255, 255, .6);
+      border-radius: 12px;
+      padding: 28px;
+    }
+
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      color: var(--faint);
+      margin-bottom: 12px;
+    }
+
+    .empty-state h3 {
+      color: var(--ink);
+      font-size: 1rem;
+      margin-bottom: 6px;
+    }
+
+    @media (max-width: 1060px) {
+      .auth-layout { grid-template-columns: 1fr; min-height: auto; }
+      .auth-art { min-height: 420px; }
+      .auth-card { border-right: 0; border-bottom: 1px solid var(--line); }
+      .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .header { grid-template-columns: 1fr; align-items: stretch; }
+      .header-right { justify-content: flex-start; flex-wrap: wrap; }
+      .search-wrap { order: 2; }
+    }
+
+    @media (max-width: 640px) {
+      .auth-screen { padding: 14px; }
+      .auth-layout { border-radius: 12px; }
+      .auth-art { display: none; }
+      .brand-name { display: none; }
+      .header-right .btn span:not(.keep-label), .status-pill span:last-child { display: none; }
+      .user-name { max-width: 88px; }
+      .dashboard-top { align-items: flex-start; flex-direction: column; }
+      .cards-grid { grid-template-columns: 1fr; }
+      .card-footer { align-items: flex-start; flex-direction: column; }
+      .signal-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <section class="auth-screen hidden" id="auth-screen" aria-live="polite">
+    <div class="auth-layout">
+      <div class="auth-card">
+        <div class="brand-lockup">
+          <div class="brand-mark" aria-hidden="true">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M13 2 4 14h7l-1 8 10-13h-7l0-7Z"></path>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <strong>AI News Aggregator</strong>
+            <span>Private briefing desk</span>
+          </div>
+        </div>
+
+        <h1 class="auth-title" id="auth-title">Welcome back</h1>
+        <p class="auth-subtitle" id="auth-subtitle">Sign in to continue to your curated AI news dashboard.</p>
+
+        <div class="auth-tabs" role="tablist" aria-label="Authentication">
+          <button class="auth-tab active" data-auth-tab="login" type="button" role="tab" aria-selected="true">Login</button>
+          <button class="auth-tab" data-auth-tab="signup" type="button" role="tab" aria-selected="false">Sign up</button>
+        </div>
+
+        <form class="auth-form active" id="login-form" novalidate>
+          <div class="field">
+            <label for="login-identifier">Email or username</label>
+            <div class="input-wrap">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21a8 8 0 0 0-16 0"></path><circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <input class="input" id="login-identifier" name="identifier" type="text" autocomplete="username" placeholder="you@example.com" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="login-password">Password</label>
+            <div class="input-wrap">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V8a5 5 0 0 1 10 0v3"></path>
+              </svg>
+              <input class="input password-input" id="login-password" name="password" type="password" autocomplete="current-password" placeholder="Enter password" required />
+              <button class="password-toggle" type="button" data-toggle-password="login-password" aria-label="Show password">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="alert alert-error hidden" id="login-error"></div>
+          <div class="form-actions">
+            <button class="btn btn-primary" id="login-submit" type="submit">
+              <span class="keep-label">Login</span>
+            </button>
+          </div>
+        </form>
+
+        <form class="auth-form" id="signup-form" novalidate>
+          <div class="field">
+            <label for="signup-username">Username</label>
+            <div class="input-wrap">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21a8 8 0 0 0-16 0"></path><circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <input class="input" id="signup-username" name="username" type="text" autocomplete="username" placeholder="alex_ai" minlength="3" maxlength="30" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="signup-email">Email ID</label>
+            <div class="input-wrap">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path>
+              </svg>
+              <input class="input" id="signup-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <div class="field-row">
+              <label for="signup-password">Password</label>
+            </div>
+            <div class="input-wrap">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V8a5 5 0 0 1 10 0v3"></path>
+              </svg>
+              <input class="input password-input" id="signup-password" name="password" type="password" autocomplete="new-password" placeholder="Create password" required />
+              <button class="password-toggle" type="button" data-toggle-password="signup-password" aria-label="Show password">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+            </div>
+            <div class="password-meter" aria-hidden="true"><span id="password-meter-bar"></span></div>
+            <div class="password-hints">
+              <span class="hint" id="hint-length">8+ chars</span>
+              <span class="hint" id="hint-letter">letter</span>
+              <span class="hint" id="hint-number">number</span>
+            </div>
+          </div>
+
+          <div class="alert alert-error hidden" id="signup-error"></div>
+          <div class="form-actions">
+            <button class="btn btn-primary" id="signup-submit" type="submit">
+              <span class="keep-label">Create account</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <aside class="auth-art" aria-hidden="true">
+        <div class="brief-stack">
+          <div class="brief-card wide">
+            <div class="brief-top">
+              <span>Daily AI briefing</span>
+              <span class="brief-pill">Session protected</span>
+            </div>
+            <h2 class="brief-title">Your signal, organized.</h2>
+            <p class="brief-copy">OpenAI, Anthropic, and YouTube updates collected into one calm reading surface.</p>
+            <div class="signal-grid">
+              <div class="signal"><strong>03</strong><span>sources</span></div>
+              <div class="signal"><strong>24h</strong><span>digest cycle</span></div>
+              <div class="signal"><strong>AI</strong><span>summaries</span></div>
+            </div>
+          </div>
+          <div class="brief-card offset">
+            <div class="brief-top">
+              <span>Latest brief</span>
+              <span>Ready</span>
+            </div>
+            <p class="brief-copy">Research drops, model updates, and creator analysis stay tucked behind your account.</p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <div class="app-shell hidden" id="app-shell">
+    <header class="header">
+      <a href="#" class="brand" aria-label="AI News Aggregator home">
+        <span class="brand-mark" aria-hidden="true">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2 4 14h7l-1 8 10-13h-7l0-7Z"></path>
+          </svg>
+        </span>
+        <span class="brand-name">AI News Aggregator</span>
+      </a>
+
+      <div class="search-wrap">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path>
+        </svg>
+        <input id="search-input" class="search-input" type="text" placeholder="Search news..." autocomplete="off" aria-label="Search news" />
+      </div>
+
+      <div class="header-right">
+        <div class="status-pill" id="status-pill">
+          <span class="status-dot" id="status-dot"></span>
+          <span id="status-label">Idle</span>
+        </div>
+        <button class="btn btn-primary" id="btn-run" type="button" aria-label="Run pipeline">
+          <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M8 5v14l11-7L8 5Z"></path>
+          </svg>
+          <span id="btn-label">Run Pipeline</span>
+        </button>
+        <div class="user-chip" title="Current user">
+          <span class="avatar" id="user-avatar">U</span>
+          <span class="user-name" id="user-name">User</span>
+        </div>
+        <button class="btn btn-danger" id="btn-logout" type="button" aria-label="Logout">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path>
+          </svg>
+          <span class="keep-label">Logout</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="scanning-bar" id="scanning-bar"></div>
+
+    <main class="main">
+      <div class="dashboard-top">
+        <div>
+          <h1 class="section-title">Latest News</h1>
+          <p class="section-sub" id="article-count">0 articles found</p>
+        </div>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="News categories">
+        <button class="tab-btn active" data-tab="all" role="tab" aria-selected="true">All</button>
+        <button class="tab-btn" data-tab="youtube" role="tab" aria-selected="false">YouTube</button>
+        <button class="tab-btn" data-tab="openai" role="tab" aria-selected="false">OpenAI</button>
+        <button class="tab-btn" data-tab="anthropic" role="tab" aria-selected="false">Anthropic</button>
+      </nav>
+
+      <div class="cards-grid" id="cards-grid" role="list"></div>
+    </main>
+  </div>
+
+  <script>
+    const state = {
+      user: null,
+      articles: [],
+      activeTab: 'all',
+      searchQuery: '',
+      pipelineRunning: false,
+      pollInterval: null
+    };
+
+    const authScreen = document.getElementById('auth-screen');
+    const appShell = document.getElementById('app-shell');
+    const authTitle = document.getElementById('auth-title');
+    const authSubtitle = document.getElementById('auth-subtitle');
+
+    function iconCalendar() {
+      return `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path>
+      </svg>`;
+    }
+
+    function iconArrow() {
+      return `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>
+      </svg>`;
+    }
+
+    function escapeHtml(value) {
+      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      return String(value ?? '').replace(/[&<>"']/g, char => map[char]);
+    }
+
+    function showError(id, message) {
+      const el = document.getElementById(id);
+      el.textContent = message;
+      el.classList.remove('hidden');
+    }
+
+    function clearError(id) {
+      const el = document.getElementById(id);
+      el.textContent = '';
+      el.classList.add('hidden');
+    }
+
+    function setButtonLoading(button, loading, label) {
+      button.disabled = loading;
+      button.querySelector('.keep-label').textContent = loading ? 'Please wait...' : label;
+    }
+
+    function setAuthMode(mode) {
+      const isSignup = mode === 'signup';
+      document.querySelectorAll('.auth-tab').forEach(tab => {
+        const active = tab.dataset.authTab === mode;
+        tab.classList.toggle('active', active);
+        tab.setAttribute('aria-selected', String(active));
+      });
+      document.getElementById('login-form').classList.toggle('active', !isSignup);
+      document.getElementById('signup-form').classList.toggle('active', isSignup);
+      authTitle.textContent = isSignup ? 'Create account' : 'Welcome back';
+      authSubtitle.textContent = isSignup
+        ? 'Create your private account for the AI news dashboard.'
+        : 'Sign in to continue to your curated AI news dashboard.';
+      clearError('login-error');
+      clearError('signup-error');
+    }
+
+    function showAuth(mode = 'login') {
+      state.user = null;
+      stopPolling();
+      setAuthMode(mode);
+      appShell.classList.add('hidden');
+      authScreen.classList.remove('hidden');
+      setTimeout(() => {
+        const target = mode === 'signup' ? 'signup-username' : 'login-identifier';
+        document.getElementById(target).focus();
+      }, 60);
+    }
+
+    function showApp() {
+      authScreen.classList.add('hidden');
+      appShell.classList.remove('hidden');
+      renderUser();
+    }
+
+    function renderUser() {
+      const username = state.user?.username || 'User';
+      document.getElementById('user-name').textContent = username;
+      document.getElementById('user-avatar').textContent = username.slice(0, 1) || 'U';
+    }
+
+    async function readJson(response) {
+      const text = await response.text();
+      if (!text) return {};
+      try {
+        return JSON.parse(text);
+      } catch {
+        return { detail: text };
+      }
+    }
+
+    async function apiRequest(url, options = {}) {
+      const headers = options.body
+        ? { 'Content-Type': 'application/json', ...(options.headers || {}) }
+        : { ...(options.headers || {}) };
+      const response = await fetch(url, {
+        credentials: 'same-origin',
+        ...options,
+        headers
+      });
+
+      if (response.status === 401 && !url.startsWith('/api/auth/')) {
+        showAuth('login');
+      }
+
+      return response;
+    }
+
+    async function loadCurrentUser() {
+      try {
+        const response = await apiRequest('/api/auth/me');
+        if (!response.ok) {
+          showAuth('login');
+          return;
+        }
+        const data = await response.json();
+        state.user = data.user;
+        showApp();
+        await Promise.all([fetchArticles(), checkStatus()]);
+      } catch {
+        showAuth('login');
+      }
+    }
+
+    document.querySelectorAll('.auth-tab').forEach(tab => {
+      tab.addEventListener('click', () => setAuthMode(tab.dataset.authTab));
+    });
+
+    document.querySelectorAll('[data-toggle-password]').forEach(button => {
+      button.addEventListener('click', () => {
+        const input = document.getElementById(button.dataset.togglePassword);
+        const reveal = input.type === 'password';
+        input.type = reveal ? 'text' : 'password';
+        button.setAttribute('aria-label', reveal ? 'Hide password' : 'Show password');
+      });
+    });
+
+    function updatePasswordMeter() {
+      const value = document.getElementById('signup-password').value;
+      const checks = {
+        length: value.length >= 8,
+        letter: /[A-Za-z]/.test(value),
+        number: /\d/.test(value)
+      };
+      document.getElementById('hint-length').classList.toggle('good', checks.length);
+      document.getElementById('hint-letter').classList.toggle('good', checks.letter);
+      document.getElementById('hint-number').classList.toggle('good', checks.number);
+
+      const score = Object.values(checks).filter(Boolean).length;
+      const bar = document.getElementById('password-meter-bar');
+      bar.style.width = `${(score / 3) * 100}%`;
+      bar.style.background = score < 2 ? 'var(--rose)' : score < 3 ? '#f59e0b' : 'var(--green)';
+    }
+
+    document.getElementById('signup-password').addEventListener('input', updatePasswordMeter);
+
+    document.getElementById('login-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      clearError('login-error');
+      const submit = document.getElementById('login-submit');
+      const payload = {
+        identifier: document.getElementById('login-identifier').value.trim(),
+        password: document.getElementById('login-password').value
+      };
+
+      if (!payload.identifier || !payload.password) {
+        showError('login-error', 'Email or username and password are required.');
+        return;
+      }
+
+      setButtonLoading(submit, true, 'Login');
+      try {
+        const response = await apiRequest('/api/auth/login', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const data = await readJson(response);
+        if (!response.ok) {
+          showError('login-error', data.detail || 'Login failed.');
+          return;
+        }
+        state.user = data.user;
+        showApp();
+        await Promise.all([fetchArticles(), checkStatus()]);
+      } catch {
+        showError('login-error', 'Network error. Please try again.');
+      } finally {
+        setButtonLoading(submit, false, 'Login');
+      }
+    });
+
+    document.getElementById('signup-form').addEventListener('submit', async event => {
+      event.preventDefault();
+      clearError('signup-error');
+      const submit = document.getElementById('signup-submit');
+      const payload = {
+        username: document.getElementById('signup-username').value.trim(),
+        email: document.getElementById('signup-email').value.trim(),
+        password: document.getElementById('signup-password').value
+      };
+
+      if (!payload.username || !payload.email || !payload.password) {
+        showError('signup-error', 'Username, email ID, and password are required.');
+        return;
+      }
+
+      setButtonLoading(submit, true, 'Create account');
+      try {
+        const response = await apiRequest('/api/auth/signup', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const data = await readJson(response);
+        if (!response.ok) {
+          showError('signup-error', data.detail || 'Signup failed.');
+          return;
+        }
+        state.user = data.user;
+        showApp();
+        await Promise.all([fetchArticles(), checkStatus()]);
+      } catch {
+        showError('signup-error', 'Network error. Please try again.');
+      } finally {
+        setButtonLoading(submit, false, 'Create account');
+      }
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', async () => {
+      try {
+        await apiRequest('/api/auth/logout', { method: 'POST' });
+      } finally {
+        state.articles = [];
+        renderCards();
+        showAuth('login');
+      }
+    });
+
+    function badgeClass(category) { return `badge badge-${category}`; }
+    function sourceClass(category) { return `card-meta-source ${category}`; }
+
+    function categoryLabel(category) {
+      return { openai: 'OpenAI', youtube: 'YouTube', anthropic: 'Anthropic' }[category] || category;
+    }
+
+    function seedFrom(value) {
+      return String(value ?? 'card').split('').reduce((sum, char) => (sum * 31 + char.charCodeAt(0)) % 997, 7);
+    }
+
+    function generateCardImage(category, id) {
+      const seed = seedFrom(`${category}-${id}`);
+      const themes = {
+        openai: { g1: '#2563eb', g2: '#0ea5e9', g3: '#0f766e', soft: 'rgba(255,255,255,.18)' },
+        youtube: { g1: '#e11d48', g2: '#ef4444', g3: '#f97316', soft: 'rgba(255,255,255,.20)' },
+        anthropic: { g1: '#b45309', g2: '#d97706', g3: '#0f766e', soft: 'rgba(255,255,255,.18)' }
+      };
+      const t = themes[category] || themes.openai;
+      const c1 = 90 + seed % 120;
+      const c2 = 370 + seed % 110;
+      const icon = category === 'youtube'
+        ? `<polygon points="282,145 332,170 282,195" fill="rgba(255,255,255,.78)"/>`
+        : category === 'anthropic'
+          ? `<path d="M300 122 356 218H244l56-96Z" fill="none" stroke="rgba(255,255,255,.58)" stroke-width="5"/><circle cx="300" cy="178" r="12" fill="rgba(255,255,255,.64)"/>`
+          : `<circle cx="300" cy="170" r="54" fill="none" stroke="rgba(255,255,255,.52)" stroke-width="5"/><circle cx="300" cy="170" r="20" fill="rgba(255,255,255,.58)"/><path d="M300 96v38M300 206v38M226 170h38M336 170h38" stroke="rgba(255,255,255,.58)" stroke-width="5" stroke-linecap="round"/>`;
+
+      const svgRaw = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="340" viewBox="0 0 600 340">
+        <defs><linearGradient id="g${seed}" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${t.g1}"/><stop offset=".54" stop-color="${t.g2}"/><stop offset="1" stop-color="${t.g3}"/></linearGradient></defs>
+        <rect width="600" height="340" fill="url(#g${seed})"/>
+        <circle cx="${c1}" cy="70" r="150" fill="${t.soft}"/>
+        <circle cx="${c2}" cy="292" r="130" fill="rgba(255,255,255,.12)"/>
+        <path d="M0 260 C130 210 190 290 315 236 S500 160 600 214" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="2"/>
+        <g opacity=".22">${Array.from({ length: 70 }, (_, i) => `<circle cx="${35 + (i % 14) * 40}" cy="${34 + Math.floor(i / 14) * 48}" r="2" fill="#fff"/>`).join('')}</g>
+        ${icon}
+      </svg>`;
+      return `data:image/svg+xml,${encodeURIComponent(svgRaw)}`;
+    }
+
+    function getFilteredArticles() {
+      return state.articles.filter(article => {
+        const category = article.category || '';
+        const matchTab = state.activeTab === 'all' || category === state.activeTab;
+        const query = state.searchQuery.toLowerCase();
+        const matchSearch = !query ||
+          String(article.title || '').toLowerCase().includes(query) ||
+          String(article.description || '').toLowerCase().includes(query) ||
+          String(article.source || '').toLowerCase().includes(query);
+        return matchTab && matchSearch;
+      });
+    }
+
+    function renderCards() {
+      const grid = document.getElementById('cards-grid');
+      const count = document.getElementById('article-count');
+      const items = getFilteredArticles();
+
+      count.textContent = `${items.length} article${items.length === 1 ? '' : 's'} found`;
+
+      if (items.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path>
+              </svg>
+              <h3>No articles found</h3>
+              <p>Try a different search or run the pipeline.</p>
+            </div>
+          </div>`;
+        return;
+      }
+
+      grid.innerHTML = items.map((article, index) => {
+        const category = escapeHtml(article.category || 'openai');
+        const title = escapeHtml(article.title || 'Untitled');
+        const description = escapeHtml(article.description || '');
+        const source = escapeHtml(article.source || categoryLabel(category));
+        const date = escapeHtml(article.date || '');
+        const url = article.url ? escapeHtml(article.url) : '#';
+        const image = article.image_url || generateCardImage(article.category, article.id);
+
+        return `
+          <article class="card" role="listitem" style="animation-delay:${Math.min(index * 45, 360)}ms">
+            <div class="card-img-wrap">
+              <img src="${image}" alt="${title}" loading="lazy" />
+              <span class="${badgeClass(category)}">${escapeHtml(categoryLabel(category))}</span>
+            </div>
+            <div class="card-body">
+              <h2 class="card-title">${title}</h2>
+              <p class="card-desc">${description}</p>
+            </div>
+            <div class="card-footer">
+              <div class="card-meta">
+                ${iconCalendar()}
+                <span>${date}</span>
+                <span class="${sourceClass(category)}">${source}</span>
+              </div>
+              <a href="${url}" target="_blank" rel="noopener noreferrer" class="read-more" aria-label="Read more about ${title}">
+                Read More ${iconArrow()}
+              </a>
+            </div>
+          </article>`;
+      }).join('');
+    }
+
+    document.querySelectorAll('.tab-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(tab => {
+          tab.classList.remove('active');
+          tab.setAttribute('aria-selected', 'false');
+        });
+        button.classList.add('active');
+        button.setAttribute('aria-selected', 'true');
+        state.activeTab = button.dataset.tab;
+        renderCards();
+      });
+    });
+
+    document.getElementById('search-input').addEventListener('input', event => {
+      state.searchQuery = event.target.value.trim();
+      renderCards();
+    });
+
+    async function fetchArticles() {
+      try {
+        const response = await apiRequest('/api/articles');
+        if (!response.ok) return;
+        const data = await response.json();
+        state.articles = data.articles || [];
+        renderCards();
+      } catch {
+        renderCards();
+      }
+    }
+
+    function setPipelineUi(running) {
+      state.pipelineRunning = running;
+      document.getElementById('status-dot').classList.toggle('active', running);
+      document.getElementById('status-label').textContent = running ? 'Running' : 'Idle';
+      document.getElementById('btn-label').textContent = running ? 'Running' : 'Run Pipeline';
+      document.getElementById('btn-run').disabled = running;
+      document.getElementById('scanning-bar').classList.toggle('active', running);
+    }
+
+    function stopPolling() {
+      if (state.pollInterval) {
+        clearInterval(state.pollInterval);
+        state.pollInterval = null;
+      }
+      setPipelineUi(false);
+    }
+
+    async function checkStatus() {
+      try {
+        const response = await apiRequest('/api/pipeline/status');
+        if (!response.ok) return;
+        const data = await response.json();
+        if (data.status === 'running') {
+          setPipelineUi(true);
+          if (!state.pollInterval) {
+            state.pollInterval = setInterval(checkStatus, 2200);
+          }
+          return;
+        }
+        if (state.pipelineRunning) {
+          await fetchArticles();
+        }
+        stopPolling();
+      } catch {
+        stopPolling();
+      }
+    }
+
+    document.getElementById('btn-run').addEventListener('click', async () => {
+      if (state.pipelineRunning) return;
+      setPipelineUi(true);
+
+      try {
+        const response = await apiRequest('/api/pipeline/run', { method: 'POST' });
+        if (!response.ok) {
+          stopPolling();
+          return;
+        }
+        state.pollInterval = setInterval(checkStatus, 2200);
+      } catch {
+        stopPolling();
+      }
+    });
+
+    renderCards();
+    updatePasswordMeter();
+    loadCurrentUser();
+  </script>
+</body>
+</html>
