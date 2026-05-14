@@ -803,11 +803,179 @@
       margin-bottom: 6px;
     }
 
+    .admin-view {
+      display: grid;
+      gap: 22px;
+    }
+
+    .admin-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .stat-tile,
+    .admin-panel {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: 0 3px 14px rgba(15, 23, 42, .04);
+    }
+
+    .stat-tile {
+      min-height: 104px;
+      padding: 16px;
+      display: grid;
+      align-content: space-between;
+      gap: 10px;
+    }
+
+    .stat-tile span {
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+
+    .stat-tile strong {
+      font-size: 1.75rem;
+      line-height: 1;
+    }
+
+    .admin-panel {
+      overflow: hidden;
+    }
+
+    .panel-head {
+      min-height: 62px;
+      padding: 16px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-head h2 {
+      font-size: 1rem;
+      letter-spacing: 0;
+    }
+
+    .panel-head p {
+      color: var(--muted);
+      font-size: .84rem;
+      font-weight: 650;
+      margin-top: 4px;
+    }
+
+    .admin-list {
+      display: grid;
+    }
+
+    .admin-row {
+      display: grid;
+      grid-template-columns: 1.35fr .9fr .9fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .admin-row:last-child { border-bottom: 0; }
+
+    .admin-row.audit-row,
+    .admin-row.run-row {
+      grid-template-columns: 1fr 1fr 1fr 1.4fr;
+    }
+
+    .row-main strong {
+      display: block;
+      font-size: .94rem;
+      line-height: 1.35;
+    }
+
+    .row-main span,
+    .row-muted {
+      color: var(--muted);
+      display: block;
+      font-size: .78rem;
+      font-weight: 650;
+      margin-top: 4px;
+      overflow-wrap: anywhere;
+    }
+
+    .select,
+    .check-wrap {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--ink);
+      font-weight: 750;
+    }
+
+    .select {
+      width: 100%;
+      padding: 0 10px;
+    }
+
+    .check-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 11px;
+      color: var(--muted);
+    }
+
+    .check-wrap input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      border-radius: 999px;
+      padding: 0 9px;
+      font-size: .72rem;
+      font-weight: 900;
+      background: var(--panel-soft);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      width: fit-content;
+    }
+
+    .tag.green { color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+    .tag.red { color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+    .tag.blue { color: #1d4ed8; background: #eff6ff; border-color: #bfdbfe; }
+
+    .admin-message {
+      border-radius: var(--radius);
+      padding: 12px;
+      background: #fff;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-weight: 700;
+    }
+
     @media (max-width: 1060px) {
       .auth-layout { grid-template-columns: 1fr; min-height: auto; }
       .auth-art { min-height: 420px; }
       .auth-card { border-right: 0; border-bottom: 1px solid var(--line); }
       .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .admin-row,
+      .admin-row.audit-row,
+      .admin-row.run-row { grid-template-columns: 1fr 1fr; }
       .header { grid-template-columns: 1fr; align-items: stretch; }
       .header-right { justify-content: flex-start; flex-wrap: wrap; }
       .search-wrap { order: 2; }
@@ -822,6 +990,11 @@
       .user-name { max-width: 88px; }
       .dashboard-top { align-items: flex-start; flex-direction: column; }
       .cards-grid { grid-template-columns: 1fr; }
+      .stats-grid,
+      .admin-row,
+      .admin-row.audit-row,
+      .admin-row.run-row { grid-template-columns: 1fr; }
+      .panel-head { align-items: flex-start; flex-direction: column; }
       .card-footer { align-items: flex-start; flex-direction: column; }
       .signal-grid { grid-template-columns: 1fr; }
     }
@@ -994,6 +1167,12 @@
           </svg>
           <span id="btn-label">Run Pipeline</span>
         </button>
+        <button class="btn btn-secondary hidden" id="btn-admin" type="button" aria-label="Open admin panel">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3 4 7v6c0 5 3.5 7.5 8 8 4.5-.5 8-3 8-8V7l-8-4Z"></path><path d="M9 12l2 2 4-4"></path>
+          </svg>
+          <span id="btn-admin-label" class="keep-label">Admin</span>
+        </button>
         <div class="user-chip" title="Current user">
           <span class="avatar" id="user-avatar">U</span>
           <span class="user-name" id="user-name">User</span>
@@ -1010,21 +1189,70 @@
     <div class="scanning-bar" id="scanning-bar"></div>
 
     <main class="main">
-      <div class="dashboard-top">
-        <div>
-          <h1 class="section-title">Latest News</h1>
-          <p class="section-sub" id="article-count">0 articles found</p>
+      <section id="news-view">
+        <div class="dashboard-top">
+          <div>
+            <h1 class="section-title">Latest News</h1>
+            <p class="section-sub" id="article-count">0 articles found</p>
+          </div>
         </div>
-      </div>
 
-      <nav class="tabs" role="tablist" aria-label="News categories">
-        <button class="tab-btn active" data-tab="all" role="tab" aria-selected="true">All</button>
-        <button class="tab-btn" data-tab="youtube" role="tab" aria-selected="false">YouTube</button>
-        <button class="tab-btn" data-tab="openai" role="tab" aria-selected="false">OpenAI</button>
-        <button class="tab-btn" data-tab="anthropic" role="tab" aria-selected="false">Anthropic</button>
-      </nav>
+        <nav class="tabs" role="tablist" aria-label="News categories">
+          <button class="tab-btn active" data-tab="all" role="tab" aria-selected="true">All</button>
+          <button class="tab-btn" data-tab="youtube" role="tab" aria-selected="false">YouTube</button>
+          <button class="tab-btn" data-tab="openai" role="tab" aria-selected="false">OpenAI</button>
+          <button class="tab-btn" data-tab="anthropic" role="tab" aria-selected="false">Anthropic</button>
+        </nav>
 
-      <div class="cards-grid" id="cards-grid" role="list"></div>
+        <div class="cards-grid" id="cards-grid" role="list"></div>
+      </section>
+
+      <section class="admin-view hidden" id="admin-view" aria-live="polite">
+        <div class="dashboard-top">
+          <div>
+            <h1 class="section-title">Admin Panel</h1>
+            <p class="section-sub">Manage users, pipeline runs, and activity logs.</p>
+          </div>
+          <div class="admin-actions">
+            <button class="btn btn-secondary" id="admin-refresh" type="button">Refresh</button>
+            <button class="btn btn-primary" id="admin-run" type="button">Run Pipeline</button>
+          </div>
+        </div>
+
+        <div class="admin-message hidden" id="admin-error"></div>
+
+        <div class="stats-grid" id="admin-summary-grid"></div>
+
+        <section class="admin-panel">
+          <div class="panel-head">
+            <div>
+              <h2>User Management</h2>
+              <p>Change roles and activate or deactivate accounts.</p>
+            </div>
+          </div>
+          <div class="admin-list" id="admin-users-body"></div>
+        </section>
+
+        <section class="admin-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Pipeline History</h2>
+              <p>Recent runs triggered from the admin tools.</p>
+            </div>
+          </div>
+          <div class="admin-list" id="admin-runs-body"></div>
+        </section>
+
+        <section class="admin-panel">
+          <div class="panel-head">
+            <div>
+              <h2>Audit Logs</h2>
+              <p>Recent privileged changes in the system.</p>
+            </div>
+          </div>
+          <div class="admin-list" id="admin-audit-body"></div>
+        </section>
+      </section>
     </main>
   </div>
 
@@ -1033,15 +1261,23 @@
       user: null,
       articles: [],
       activeTab: 'all',
+      activeView: 'news',
       searchQuery: '',
       pipelineRunning: false,
-      pollInterval: null
+      pollInterval: null,
+      adminLoaded: false
     };
 
     const authScreen = document.getElementById('auth-screen');
     const appShell = document.getElementById('app-shell');
     const authTitle = document.getElementById('auth-title');
     const authSubtitle = document.getElementById('auth-subtitle');
+    const newsView = document.getElementById('news-view');
+    const adminView = document.getElementById('admin-view');
+    const btnRun = document.getElementById('btn-run');
+    const btnAdmin = document.getElementById('btn-admin');
+    const btnAdminLabel = document.getElementById('btn-admin-label');
+    const adminError = document.getElementById('admin-error');
 
     function iconCalendar() {
       return `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1053,6 +1289,10 @@
       return `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
         <path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>
       </svg>`;
+    }
+
+    function isSuperUser() {
+      return state.user?.role === 'super_user';
     }
 
     function escapeHtml(value) {
@@ -1096,6 +1336,8 @@
 
     function showAuth(mode = 'login') {
       state.user = null;
+      state.activeView = 'news';
+      state.adminLoaded = false;
       stopPolling();
       setAuthMode(mode);
       appShell.classList.add('hidden');
@@ -1110,12 +1352,37 @@
       authScreen.classList.add('hidden');
       appShell.classList.remove('hidden');
       renderUser();
+      renderAccess();
+      showView('news');
     }
 
     function renderUser() {
       const username = state.user?.username || 'User';
       document.getElementById('user-name').textContent = username;
       document.getElementById('user-avatar').textContent = username.slice(0, 1) || 'U';
+    }
+
+    function renderAccess() {
+      const admin = isSuperUser();
+      btnRun.classList.toggle('hidden', !admin);
+      document.getElementById('status-pill').classList.toggle('hidden', !admin);
+      btnAdmin.classList.toggle('hidden', !admin);
+      if (!admin) {
+        stopPolling();
+      }
+    }
+
+    function showView(view) {
+      const target = view === 'admin' && isSuperUser() ? 'admin' : 'news';
+      state.activeView = target;
+      newsView.classList.toggle('hidden', target !== 'news');
+      adminView.classList.toggle('hidden', target !== 'admin');
+      document.querySelector('.search-wrap').classList.toggle('hidden', target === 'admin');
+      btnAdminLabel.textContent = target === 'admin' ? 'News' : 'Admin';
+      btnAdmin.setAttribute('aria-label', target === 'admin' ? 'Open news dashboard' : 'Open admin panel');
+      if (target === 'admin' && !state.adminLoaded) {
+        loadAdminDashboard();
+      }
     }
 
     async function readJson(response) {
@@ -1155,7 +1422,10 @@
         const data = await response.json();
         state.user = data.user;
         showApp();
-        await Promise.all([fetchArticles(), checkStatus()]);
+        await fetchArticles();
+        if (isSuperUser()) {
+          await checkStatus();
+        }
       } catch {
         showAuth('login');
       }
@@ -1220,7 +1490,10 @@
         }
         state.user = data.user;
         showApp();
-        await Promise.all([fetchArticles(), checkStatus()]);
+        await fetchArticles();
+        if (isSuperUser()) {
+          await checkStatus();
+        }
       } catch {
         showError('login-error', 'Network error. Please try again.');
       } finally {
@@ -1256,7 +1529,10 @@
         }
         state.user = data.user;
         showApp();
-        await Promise.all([fetchArticles(), checkStatus()]);
+        await fetchArticles();
+        if (isSuperUser()) {
+          await checkStatus();
+        }
       } catch {
         showError('signup-error', 'Network error. Please try again.');
       } finally {
@@ -1269,6 +1545,7 @@
         await apiRequest('/api/auth/logout', { method: 'POST' });
       } finally {
         state.articles = [];
+        state.adminLoaded = false;
         renderCards();
         showAuth('login');
       }
@@ -1334,6 +1611,7 @@
       count.textContent = `${items.length} article${items.length === 1 ? '' : 's'} found`;
 
       if (items.length === 0) {
+        const emptyHint = isSuperUser() ? 'Try a different search or run the pipeline.' : 'Try a different search or check back after the next update.';
         grid.innerHTML = `
           <div class="empty-state">
             <div>
@@ -1341,7 +1619,7 @@
                 <circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path>
               </svg>
               <h3>No articles found</h3>
-              <p>Try a different search or run the pipeline.</p>
+              <p>${emptyHint}</p>
             </div>
           </div>`;
         return;
@@ -1428,6 +1706,7 @@
     }
 
     async function checkStatus() {
+      if (!isSuperUser()) return;
       try {
         const response = await apiRequest('/api/pipeline/status');
         if (!response.ok) return;
@@ -1441,6 +1720,9 @@
         }
         if (state.pipelineRunning) {
           await fetchArticles();
+          if (state.activeView === 'admin') {
+            await loadAdminDashboard(true);
+          }
         }
         stopPolling();
       } catch {
@@ -1449,7 +1731,7 @@
     }
 
     document.getElementById('btn-run').addEventListener('click', async () => {
-      if (state.pipelineRunning) return;
+      if (!isSuperUser() || state.pipelineRunning) return;
       setPipelineUi(true);
 
       try {
@@ -1463,6 +1745,206 @@
         stopPolling();
       }
     });
+
+    btnAdmin.addEventListener('click', () => {
+      showView(state.activeView === 'admin' ? 'news' : 'admin');
+    });
+
+    document.getElementById('admin-refresh').addEventListener('click', () => {
+      loadAdminDashboard(true);
+    });
+
+    document.getElementById('admin-run').addEventListener('click', async () => {
+      if (!isSuperUser() || state.pipelineRunning) return;
+      setPipelineUi(true);
+      try {
+        const response = await apiRequest('/api/pipeline/run', { method: 'POST' });
+        const data = await readJson(response);
+        if (!response.ok) {
+          showAdminError(data.detail || 'Pipeline could not be started.');
+          stopPolling();
+          return;
+        }
+        state.pollInterval = setInterval(checkStatus, 2200);
+        await loadAdminDashboard(true);
+      } catch {
+        showAdminError('Network error while starting the pipeline.');
+        stopPolling();
+      }
+    });
+
+    document.getElementById('admin-users-body').addEventListener('click', async event => {
+      const button = event.target.closest('[data-save-user]');
+      if (!button) return;
+
+      const row = button.closest('[data-user-row]');
+      const userId = row.dataset.userId;
+      const role = row.querySelector('[data-role-select]').value;
+      const isActive = row.querySelector('[data-active-toggle]').checked;
+
+      button.disabled = true;
+      try {
+        const response = await apiRequest(`/api/admin/users/${encodeURIComponent(userId)}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ role, is_active: isActive })
+        });
+        const data = await readJson(response);
+        if (!response.ok) {
+          showAdminError(data.detail || 'User could not be updated.');
+          return;
+        }
+        await loadAdminDashboard(true);
+      } catch {
+        showAdminError('Network error while updating the user.');
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    function showAdminError(message) {
+      adminError.textContent = message;
+      adminError.classList.remove('hidden');
+    }
+
+    function clearAdminError() {
+      adminError.textContent = '';
+      adminError.classList.add('hidden');
+    }
+
+    function shortDate(value) {
+      if (!value) return '-';
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return value;
+      return date.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+    }
+
+    async function loadAdminDashboard(force = false) {
+      if (!isSuperUser()) return;
+      if (state.adminLoaded && !force) return;
+
+      clearAdminError();
+      try {
+        const [summaryResponse, usersResponse, runsResponse, auditResponse] = await Promise.all([
+          apiRequest('/api/admin/summary'),
+          apiRequest('/api/admin/users'),
+          apiRequest('/api/admin/pipeline/runs'),
+          apiRequest('/api/admin/audit-logs')
+        ]);
+
+        if (!summaryResponse.ok || !usersResponse.ok || !runsResponse.ok || !auditResponse.ok) {
+          showAdminError('Admin data could not be loaded.');
+          return;
+        }
+
+        const [summary, users, runs, audit] = await Promise.all([
+          summaryResponse.json(),
+          usersResponse.json(),
+          runsResponse.json(),
+          auditResponse.json()
+        ]);
+
+        renderAdminSummary(summary);
+        renderAdminUsers(users.users || []);
+        renderPipelineRuns(runs.runs || []);
+        renderAuditLogs(audit.logs || []);
+        state.adminLoaded = true;
+      } catch {
+        showAdminError('Network error while loading admin data.');
+      }
+    }
+
+    function renderAdminSummary(data) {
+      const grid = document.getElementById('admin-summary-grid');
+      const sources = data.content?.sources || {};
+      const running = data.pipeline?.status?.status === 'running';
+      grid.innerHTML = [
+        ['Users', data.users?.total ?? 0],
+        ['Active Users', data.users?.active ?? 0],
+        ['Super Users', data.users?.super_users ?? 0],
+        ['Digests', data.content?.digests ?? 0],
+        ['Pipeline', running ? 'Running' : 'Idle'],
+        ['YouTube', sources.youtube || 0],
+        ['OpenAI', sources.openai || 0],
+        ['Anthropic', sources.anthropic || 0]
+      ].map(([label, value]) => `
+        <div class="stat-tile">
+          <span>${escapeHtml(label)}</span>
+          <strong>${escapeHtml(value)}</strong>
+        </div>
+      `).join('');
+    }
+
+    function renderAdminUsers(users) {
+      const body = document.getElementById('admin-users-body');
+      if (!users.length) {
+        body.innerHTML = '<div class="admin-row"><div class="row-muted">No users found.</div></div>';
+        return;
+      }
+
+      body.innerHTML = users.map(user => {
+        const isSelf = user.id === state.user?.id;
+        return `
+          <div class="admin-row" data-user-row data-user-id="${escapeHtml(user.id)}">
+            <div class="row-main">
+              <strong>${escapeHtml(user.username)} ${isSelf ? '<span class="tag blue">You</span>' : ''}</strong>
+              <span>${escapeHtml(user.email)}</span>
+            </div>
+            <select class="select" data-role-select aria-label="Role for ${escapeHtml(user.username)}">
+              <option value="normal_user" ${user.role === 'normal_user' ? 'selected' : ''}>Normal User</option>
+              <option value="super_user" ${user.role === 'super_user' ? 'selected' : ''}>Super User</option>
+            </select>
+            <label class="check-wrap">
+              <input type="checkbox" data-active-toggle ${user.is_active ? 'checked' : ''} />
+              Active
+            </label>
+            <button class="btn btn-secondary" type="button" data-save-user>Save</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderPipelineRuns(runs) {
+      const body = document.getElementById('admin-runs-body');
+      if (!runs.length) {
+        body.innerHTML = '<div class="admin-row run-row"><div class="row-muted">No pipeline runs recorded yet.</div></div>';
+        return;
+      }
+
+      body.innerHTML = runs.map(run => {
+        const statusClass = run.status === 'success' ? 'green' : run.status === 'failed' ? 'red' : 'blue';
+        return `
+          <div class="admin-row run-row">
+            <div><span class="tag ${statusClass}">${escapeHtml(run.status)}</span></div>
+            <div class="row-muted">${escapeHtml(shortDate(run.started_at))}</div>
+            <div class="row-muted">${escapeHtml(run.triggered_by || 'Unknown')}</div>
+            <div class="row-muted">${escapeHtml(run.error || `${Math.round(run.duration_seconds || 0)} seconds`)}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderAuditLogs(logs) {
+      const body = document.getElementById('admin-audit-body');
+      if (!logs.length) {
+        body.innerHTML = '<div class="admin-row audit-row"><div class="row-muted">No admin activity recorded yet.</div></div>';
+        return;
+      }
+
+      body.innerHTML = logs.map(log => {
+        const details = JSON.stringify(log.details || {});
+        return `
+          <div class="admin-row audit-row">
+            <div class="row-main">
+              <strong>${escapeHtml(log.action)}</strong>
+              <span>${escapeHtml(shortDate(log.created_at))}</span>
+            </div>
+            <div class="row-muted">${escapeHtml(log.actor || 'System')}</div>
+            <div class="row-muted">${escapeHtml(log.target_type)} ${escapeHtml(log.target_id || '')}</div>
+            <div class="row-muted">${escapeHtml(details)}</div>
+          </div>
+        `;
+      }).join('');
+    }
 
     renderCards();
     updatePasswordMeter();

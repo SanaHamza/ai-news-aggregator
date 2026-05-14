@@ -95,7 +95,7 @@ python -m uvicorn app.api:app --reload
 
 Then, open your browser and navigate to `http://localhost:8000`.
 
-The Web UI now opens with signup/login. Create an account with an email ID, username, and password before using the dashboard. See `AUTHENTICATION.md` for the implementation details behind signup, login, logout, and session management.
+The Web UI now opens with signup/login. Create an account with an email ID, username, and password before using the dashboard. See `docs/AUTHENTICATION.md` for signup/login details and `docs/ADMIN_PANEL.md` for Super User setup.
 
 The pipeline will:
 1. Scrape articles from configured sources (YouTube channels, OpenAI blog, Anthropic blog).

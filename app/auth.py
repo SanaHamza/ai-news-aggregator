@@ -11,7 +11,7 @@ from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
 from app.database.connection import get_session
-from app.database.models import User, UserSession
+from app.database.models import ROLE_NORMAL_USER, ROLE_SUPER_USER, User, UserSession
 
 
 SESSION_COOKIE_NAME = "ai_news_session"
@@ -34,6 +34,8 @@ def serialize_user(user: User) -> dict:
         "id": user.id,
         "email": user.email,
         "username": user.username,
+        "role": user.role,
+        "is_active": user.is_active,
     }
 
 
@@ -133,6 +135,8 @@ def register_user(db: Session, email: str, username: str, password: str) -> User
         email=normalized_email,
         username=normalized_username,
         password_hash=hash_password(password),
+        role=ROLE_NORMAL_USER,
+        is_active=True,
     )
     db.add(user)
     db.commit()
@@ -148,6 +152,12 @@ def authenticate_user(db: Session, identifier: str, password: str) -> Optional[U
 
 
 def create_session(db: Session, user: User) -> str:
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This account is deactivated.",
+        )
+
     token = secrets.token_urlsafe(48)
     session = UserSession(
         user_id=user.id,
@@ -230,4 +240,21 @@ def get_current_user(
             detail="User no longer exists.",
         )
 
+    if not session.user.is_active:
+        session.revoked_at = datetime.utcnow()
+        db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This account is deactivated.",
+        )
+
     return session.user
+
+
+def require_super_user(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role != ROLE_SUPER_USER:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Super User access is required.",
+        )
+    return current_user
